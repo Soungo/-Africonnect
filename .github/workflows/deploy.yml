@@ -1,4 +1,3 @@
-
 name: Build and deploy AfriConnect
 
 on:
@@ -9,8 +8,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
@@ -19,6 +16,11 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
 
     steps:
       - name: Get source code
@@ -47,11 +49,16 @@ jobs:
           path: build/web
 
   deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
+
+    permissions:
+      pages: write
+      id-token: write
 
     steps:
       - name: Publish AfriConnect
