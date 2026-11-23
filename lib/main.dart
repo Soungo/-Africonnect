@@ -7,6 +7,215 @@ void main() {
 
 class AfriConnectApp extends StatelessWidget {
   const AfriConnectApp({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'AfriConnect',
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF16834A),
+        ),
+      ),
+      home: const AfriHomePage(),
+    );
+  }
+}
+
+class AfriHomePage extends StatefulWidget {
+  const AfriHomePage({super.key});
+
+  @override
+  State<AfriHomePage> createState() => _AfriHomePageState();
+}
+
+class _AfriHomePageState extends State<AfriHomePage> {
+  int selectedIndex = 0;
+
+  final List<Map<String, dynamic>> services = [
+    {'name': 'Marketplace', 'icon': Icons.store, 'description': 'Buy and sell products'},
+    {'name': 'Jobs', 'icon': Icons.work, 'description': 'Find jobs and employees'},
+    {'name': 'Delivery', 'icon': Icons.local_shipping, 'description': 'Organize deliveries'},
+    {'name': 'Education', 'icon': Icons.school, 'description': 'Learn and discover courses'},
+    {'name': 'Health', 'icon': Icons.health_and_safety, 'description': 'Health information and support'},
+    {'name': 'Community', 'icon': Icons.people, 'description': 'Connect with people'},
+  ];
+
+  final List<String> countries = [
+    'Nigeria',
+    'Ghana',
+    'Cameroon',
+    "Côte d’Ivoire",
+    'Senegal',
+    'Mali',
+  ];
+
+  String selectedCountry = 'Nigeria';
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'AfriConnect',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () => _showMessage('Notifications coming soon'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.account_circle_outlined),
+            onPressed: () => _showMessage('Profile coming soon'),
+          ),
+        ],
+      ),
+      body: selectedIndex == 0
+          ? _home()
+          : _simplePage(
+              ['Home', 'Explore', 'Messages', 'Profile'][selectedIndex],
+            ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: selectedIndex,
+        onDestinationSelected: (index) {
+          setState(() => selectedIndex = index);
+        },
+        destinations: const [
+          NavigationDestination(icon: Icon(Icons.home_outlined), label: 'Home'),
+          NavigationDestination(icon: Icon(Icons.explore_outlined), label: 'Explore'),
+          NavigationDestination(icon: Icon(Icons.chat_outlined), label: 'Messages'),
+          NavigationDestination(icon: Icon(Icons.person_outline), label: 'Profile'),
+        ],
+      ),
+    );
+  }
+
+  Widget _home() {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        const Text(
+          'Welcome to AfriConnect',
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        const Text('Connecting Africa through one platform'),
+        const SizedBox(height: 20),
+        const Text('Select your country'),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          value: selectedCountry,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(Icons.public),
+          ),
+          items: countries.map((country) {
+            return DropdownMenuItem(
+              value: country,
+              child: Text(country),
+            );
+          }).toList(),
+          onChanged: (value) {
+            if (value != null) {
+              setState(() => selectedCountry = value);
+            }
+          },
+        ),
+        const SizedBox(height: 24),
+        const Text(
+          'Explore our services',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        ...services.map((service) {
+          return Card(
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: Colors.green.shade50,
+                child: Icon(service['icon'], color: Colors.green),
+              ),
+              title: Text(
+                service['name'],
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text(service['description']),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ServicePage(
+                      title: service['name'],
+                      description: service['description'],
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _simplePage(String title) {
+    return Center(
+      child: Text(
+        '$title\nComing soon',
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 24),
+      ),
+    );
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+}
+
+class ServicePage extends StatelessWidget {
+  final String title;
+  final String description;
+
+  const ServicePage({
+    super.key,
+    required this.title,
+    required this.description,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(description),
+            const SizedBox(height: 24),
+            const Text(
+              'This section is being developed.',
+              style: TextStyle(fontSize: 16),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
   @override
   Widget build(BuildContext context) {
