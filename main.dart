@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() => runApp(const AfriConnectApp());
 
@@ -11,300 +10,240 @@ class AfriConnectApp extends StatefulWidget {
 }
 
 class _AfriConnectAppState extends State<AfriConnectApp> {
-  Locale _locale = const Locale('en');
+  Locale locale = const Locale('en');
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'AfriConnect',
-      locale: _locale,
-      supportedLocales: const [Locale('en'), Locale('fr')],
-      localizationsDelegates: const [
-        AppStrings.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF16865B)),
-        scaffoldBackgroundColor: const Color(0xFFF5F8F6),
-      ),
-      home: HomePage(
-        locale: _locale,
-        onLocaleChanged: (value) => setState(() => _locale = value),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'AfriConnect',
+        theme: ThemeData(
+          useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF16834A)),
+          scaffoldBackgroundColor: const Color(0xFFF7F8F6),
+        ),
+        home: AfriHome(
+          locale: locale,
+          onLanguage: (value) => setState(() => locale = Locale(value)),
+        ),
+      );
 }
 
-class AppStrings {
-  AppStrings(this.locale);
+class AfriHome extends StatefulWidget {
+  const AfriHome({super.key, required this.locale, required this.onLanguage});
   final Locale locale;
-  static AppStrings of(BuildContext context) =>
-      AppStrings(Localizations.localeOf(context));
-  static const LocalizationsDelegate<AppStrings> delegate = _StringsDelegate();
+  final ValueChanged<String> onLanguage;
 
-  bool get fr => locale.languageCode == 'fr';
-  String get tagline => fr ? 'Connecter l’Afrique' : 'Connecting Africa';
-  String get welcome => fr ? 'Bienvenue sur AfriConnect' : 'Welcome to AfriConnect';
-  String get intro => fr
-      ? 'Des services utiles, réunis au même endroit.'
-      : 'Useful services, all in one place.';
-  String get country => fr ? 'Pays' : 'Country';
-  String get language => fr ? 'Langue' : 'Language';
-  String get explore => fr ? 'Découvrir les services' : 'Explore services';
-  String get footer => fr
-      ? 'Ensemble, créons des opportunités en Afrique.'
-      : 'Together, creating opportunities across Africa.';
-  String get selectCountry => fr ? 'Choisir un pays' : 'Choose a country';
-  String get marketplace => fr ? 'Marché' : 'Marketplace';
-  String get jobs => fr ? 'Emplois' : 'Jobs';
-  String get delivery => fr ? 'Livraison' : 'Delivery';
-  String get education => fr ? 'Éducation' : 'Education';
-  String get health => fr ? 'Santé' : 'Health';
-  String get community => fr ? 'Communauté' : 'Community';
+  @override
+  State<AfriHome> createState() => _AfriHomeState();
 }
 
-class _StringsDelegate extends LocalizationsDelegate<AppStrings> {
-  const _StringsDelegate();
-  @override
-  bool isSupported(Locale locale) => ['en', 'fr'].contains(locale.languageCode);
-  @override
-  Future<AppStrings> load(Locale locale) async => AppStrings(locale);
-  @override
-  bool shouldReload(_StringsDelegate old) => false;
-}
-
-class HomePage extends StatefulWidget {
-  const HomePage({
-    super.key,
-    required this.locale,
-    required this.onLocaleChanged,
-  });
-  final Locale locale;
-  final ValueChanged<Locale> onLocaleChanged;
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
+class _AfriHomeState extends State<AfriHome> {
+  int tab = 0;
   String country = 'Nigeria';
+  String search = '';
 
-  static const countries = [
-    'Nigeria',
-    'Ghana',
-    'Cameroon',
-    'Côte d’Ivoire',
-    'Senegal',
-    'Mali',
+  bool get fr => widget.locale.languageCode == 'fr';
+  String t(String en, String french) => fr ? french : en;
+
+  final countries = const [
+    ('Nigeria', '🇳🇬'),
+    ('Ghana', '🇬🇭'),
+    ('Cameroon', '🇨🇲'),
+    ('Côte d’Ivoire', '🇨🇮'),
+    ('Senegal', '🇸🇳'),
+    ('Mali', '🇲🇱'),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final s = AppStrings.of(context);
-    final services = [
-      _Service(s.marketplace, 'Find and offer products', 'Acheter et vendre', Icons.storefront_rounded, const Color(0xFFE4F3EA)),
-      _Service(s.jobs, 'Discover opportunities', 'Trouver des opportunités', Icons.work_rounded, const Color(0xFFFFEEDB)),
-      _Service(s.delivery, 'Send and receive items', 'Envoyer et recevoir', Icons.local_shipping_rounded, const Color(0xFFE4EFFB)),
-      _Service(s.education, 'Learn new skills', 'Apprendre de nouvelles compétences', Icons.school_rounded, const Color(0xFFF0E8FA)),
-      _Service(s.health, 'Find health information', 'Informations de santé', Icons.health_and_safety_rounded, const Color(0xFFFFE8E8)),
-      _Service(s.community, 'Connect with people', 'Créer des liens', Icons.groups_rounded, const Color(0xFFFFF4D8)),
+    final names = [
+      t('Discover', 'Découvrir'),
+      t('Marketplace', 'Marché'),
+      t('Jobs', 'Emplois'),
+      t('Community', 'Communauté'),
     ];
-
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF5F8F6),
-        title: Row(
-          children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: const Color(0xFF16865B),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(Icons.public_rounded, color: Colors.white),
-            ),
-            const SizedBox(width: 10),
-            const Text('AfriConnect', style: TextStyle(fontWeight: FontWeight.w800)),
-          ],
-        ),
+        title: const Row(children: [
+          CircleAvatar(
+            backgroundColor: Color(0xFF16834A),
+            child: Icon(Icons.public, color: Colors.white),
+          ),
+          SizedBox(width: 10),
+          Text('AfriConnect', style: TextStyle(fontWeight: FontWeight.w800)),
+        ]),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.language),
+            onSelected: widget.onLanguage,
+            itemBuilder: (_) => const [
+              PopupMenuItem(value: 'en', child: Text('English')),
+              PopupMenuItem(value: 'fr', child: Text('Français')),
+            ],
+          ),
+        ],
+      ),
+      body: tab == 0 ? discover() : section(names[tab]),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: tab,
+        onDestinationSelected: (value) => setState(() => tab = value),
+        destinations: [
+          NavigationDestination(icon: const Icon(Icons.explore_outlined), label: t('Home', 'Accueil')),
+          NavigationDestination(icon: const Icon(Icons.storefront_outlined), label: t('Market', 'Marché')),
+          NavigationDestination(icon: const Icon(Icons.work_outline), label: t('Jobs', 'Emplois')),
+          NavigationDestination(icon: const Icon(Icons.people_outline), label: t('Community', 'Communauté')),
+        ],
+      ),
+    );
+  }
+
+  Widget discover() => ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text(
+            t('Connecting people. Creating opportunities.',
+                'Relier les personnes. Créer des opportunités.'),
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 8),
+          Text(t(
+            'One place for business, work and community across Africa.',
+            'Un espace pour le commerce, le travail et la communauté en Afrique.',
+          )),
+          const SizedBox(height: 18),
+          countryPicker(),
+          const SizedBox(height: 14),
+          TextField(
+            onChanged: (value) => setState(() => search = value),
+            decoration: InputDecoration(
+              hintText: t('Search products, jobs or people', 'Rechercher des produits, emplois ou personnes'),
+              prefixIcon: const Icon(Icons.search),
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+            ),
+          ),
+          const SizedBox(height: 22),
+          Text(t('Explore AfriConnect', 'Explorer AfriConnect'),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          feature(Icons.storefront, 'Marketplace',
+              t('Buy and sell goods and services', 'Acheter et vendre des produits et services'), 1),
+          feature(Icons.work, t('Jobs & opportunities', 'Emplois et opportunités'),
+              t('Find work and discover talent', 'Trouver un emploi et découvrir des talents'), 2),
+          feature(Icons.people, 'Community',
+              t('Connect with people around you', 'Créer des liens avec votre communauté'), 3),
+          const SizedBox(height: 18),
+          Text(t('Popular in $country', 'Populaire en $country'),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          demoTile(Icons.shopping_bag_outlined, 'Fresh local produce',
+              'Example marketplace listing • Demo'),
+          demoTile(Icons.work_outline, 'Community sales assistant',
+              'Example job opportunity • Demo'),
+          if (search.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Text(t('Demo search: ', 'Recherche démo : ') + search),
+            ),
+          const SizedBox(height: 20),
+          Center(child: Text('AfriConnect • ${t('Connecting Africa', 'Connecter l’Afrique')}')),
+        ],
+      );
+
+  Widget countryPicker() => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.black12),
+        ),
+        child: Row(children: [
+          const Icon(Icons.location_on_outlined, color: Color(0xFF16834A)),
+          const SizedBox(width: 8),
+          Expanded(
             child: DropdownButtonHideUnderline(
-              child: DropdownButton<Locale>(
-                value: widget.locale,
-                items: const [
-                  DropdownMenuItem(value: Locale('en'), child: Text('EN')),
-                  DropdownMenuItem(value: Locale('fr'), child: Text('FR')),
-                ],
+              child: DropdownButton<String>(
+                value: country,
+                isExpanded: true,
+                items: countries.map((item) => DropdownMenuItem(
+                  value: item.$1, child: Text('${item.$2}  ${item.$1}'),
+                )).toList(),
                 onChanged: (value) {
-                  if (value != null) widget.onLocaleChanged(value);
+                  if (value != null) setState(() => country = value);
                 },
               ),
             ),
           ),
-        ],
-      ),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1050),
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(24),
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF0D704B), Color(0xFF21A36D)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(s.tagline.toUpperCase(),
-                          style: const TextStyle(color: Colors.white70, letterSpacing: 1.4, fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 18),
-                      Text(s.welcome,
-                          style: const TextStyle(color: Colors.white, fontSize: 28, height: 1.15, fontWeight: FontWeight.w800)),
-                      const SizedBox(height: 10),
-                      Text(s.intro, style: const TextStyle(color: Colors.white, fontSize: 16)),
-                      const SizedBox(height: 22),
-                      Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
-                        children: [
-                          _selector(
-                            label: s.country,
-                            child: DropdownButton<String>(
-                              value: country,
-                              dropdownColor: Colors.white,
-                              underline: const SizedBox(),
-                              isDense: true,
-                              items: countries.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
-                              onChanged: (v) => setState(() => country = v ?? country),
-                            ),
-                          ),
-                          _selector(
-                            label: s.language,
-                            child: DropdownButton<Locale>(
-                              value: widget.locale,
-                              underline: const SizedBox(),
-                              isDense: true,
-                              items: const [
-                                DropdownMenuItem(value: Locale('en'), child: Text('English')),
-                                DropdownMenuItem(value: Locale('fr'), child: Text('Français')),
-                              ],
-                              onChanged: (v) {
-                                if (v != null) widget.onLocaleChanged(v);
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 28),
-                Text(s.explore, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: Color(0xFF173B2C))),
-                const SizedBox(height: 14),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final columns = constraints.maxWidth >= 760 ? 3 : constraints.maxWidth >= 480 ? 2 : 1;
-                    return GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: services.length,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: columns,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                        mainAxisExtent: 145,
-                      ),
-                      itemBuilder: (context, index) {
-                        final item = services[index];
-                        return Card(
-                          elevation: 0,
-                          color: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
-                            side: const BorderSide(color: Color(0xFFE6ECE8)),
-                          ),
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(18),
-                            onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('${item.title} — coming soon')),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    width: 44,
-                                    height: 44,
-                                    decoration: BoxDecoration(color: item.tint, borderRadius: BorderRadius.circular(13)),
-                                    child: Icon(item.icon, color: const Color(0xFF176B4A), size: 25),
-                                  ),
-                                  const Spacer(),
-                                  Text(item.title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17)),
-                                  const SizedBox(height: 3),
-                                  Text(widget.locale.languageCode == 'fr' ? item.frDescription : item.enDescription,
-                                      style: const TextStyle(color: Color(0xFF68756E), fontSize: 12)),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
-                const SizedBox(height: 24),
-                Center(
-                  child: Text(s.footer, textAlign: TextAlign.center,
-                      style: const TextStyle(color: Color(0xFF718078), fontSize: 13)),
-                ),
-              ],
-            ),
+        ]),
+      );
+
+  Widget feature(IconData icon, String title, String subtitle, int destination) =>
+      Card(
+        elevation: 0,
+        color: Colors.white,
+        child: ListTile(
+          leading: CircleAvatar(
+            backgroundColor: const Color(0xFFE5F4EA),
+            child: Icon(icon, color: const Color(0xFF16834A)),
           ),
+          title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+          subtitle: Text(subtitle),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => setState(() => tab = destination),
+        ),
+      );
+
+  Widget demoTile(IconData icon, String title, String subtitle) => Card(
+        elevation: 0,
+        color: Colors.white,
+        child: ListTile(
+          leading: CircleAvatar(
+            backgroundColor: const Color(0xFFE5F4EA),
+            child: Icon(icon, color: const Color(0xFF16834A)),
+          ),
+          title: Text(title),
+          subtitle: Text(subtitle),
+          trailing: const Icon(Icons.chevron_right),
+        ),
+      );
+
+  Widget section(String title) {
+    final market = tab == 1;
+    final jobs = tab == 2;
+    final icon = market ? Icons.storefront : jobs ? Icons.work_outline : Icons.people_outline;
+    final description = market
+        ? t('Discover products and services from local sellers.',
+            'Découvrez les produits et services des vendeurs locaux.')
+        : jobs
+            ? t('Explore job opportunities and connect with employers.',
+                'Découvrez des offres d’emploi et contactez les employeurs.')
+            : t('Share ideas, ask questions and connect with your community.',
+                'Partagez des idées, posez des questions et échangez avec votre communauté.');
+    return ListView(padding: const EdgeInsets.all(20), children: [
+      Text(title, style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800)),
+      const SizedBox(height: 14),
+      Card(
+        color: Colors.white,
+        elevation: 0,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            CircleAvatar(
+              backgroundColor: const Color(0xFFE5F4EA),
+              child: Icon(icon, color: const Color(0xFF16834A)),
+            ),
+            const SizedBox(height: 14),
+            Text(description, style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 12),
+            Text(
+              t('Demo section — live listings will appear after the backend is connected.',
+                  'Section démo — les annonces réelles apparaîtront après la connexion du serveur.'),
+              style: const TextStyle(color: Colors.black54, fontSize: 13),
+            ),
+          ]),
         ),
       ),
-    );
+    ]);
   }
-
-  Widget _selector({required String label, required Widget child}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(label, style: const TextStyle(fontSize: 11, color: Color(0xFF627168))),
-          child,
-        ],
-      ),
-    );
-  }
-}
-
-class _Service {
-  const _Service(this.title, this.enDescription, this.frDescription, this.icon, this.tint);
-  final String title;
-  final String enDescription;
-  final String frDescription;
-  final IconData icon;
-  final Color tint;
 }
