@@ -1,4 +1,5 @@
-name: Build and deploy AfriConnect
+
+name: AfriConnect Build and Deploy
 
 on:
   push:
@@ -9,19 +10,10 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: pages
-  cancel-in-progress: true
-
 jobs:
-  build:
+  web:
+    name: Build Web App
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-
     steps:
       - name: Get source code
         uses: actions/checkout@v4
@@ -34,14 +26,11 @@ jobs:
       - name: Create web platform
         run: flutter create . --platforms web
 
-      - name: Get dependencies
+      - name: Install dependencies
         run: flutter pub get
 
       - name: Build AfriConnect
         run: flutter build web --release --base-href "/${{ github.event.repository.name }}/"
-
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
 
       - name: Upload website
         uses: actions/upload-pages-artifact@v3
@@ -49,18 +38,13 @@ jobs:
           path: build/web
 
   deploy:
-    needs: build
+    needs: web
     runs-on: ubuntu-latest
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
     permissions:
       pages: write
       id-token: write
-
+    environment:
+      name: github-pages
     steps:
       - name: Publish AfriConnect
-        id: deployment
         uses: actions/deploy-pages@v4
